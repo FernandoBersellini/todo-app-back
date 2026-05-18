@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateTodoDto {
     @IsString()
@@ -7,4 +7,8 @@ export class CreateTodoDto {
     @IsString()
     @IsOptional()
     description?: string;
+
+    @IsNumber()
+    @IsOptional()
+    userId?: number;
 }
