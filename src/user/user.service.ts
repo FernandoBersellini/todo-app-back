@@ -12,7 +12,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const user = await this.findOneByEmail(createUserDto.email);
     if(user){
-      throw new BadRequestException("Email already exists");
+      throw new BadRequestException("User already exists");
     }
 
     const { password, ...rest } = createUserDto;

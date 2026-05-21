@@ -1,98 +1,142 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# todo-app-back
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS 11 + TypeORM backend for a todo application. Provides user registration, JWT-based authentication, and per-user CRUD over todos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Stack
 
-## Description
+- **NestJS 11** (modular structure: `auth`, `user`, `todo`)
+- **TypeORM** with **PostgreSQL**
+- **JWT** via `@nestjs/jwt` for authentication, with an `AuthGuard` protecting routes
+- **bcrypt** for password hashing
+- **class-validator** DTOs
+- **Jest** for unit and e2e tests
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Requirements
 
-## Project setup
+- Node.js 20+
+- npm
+- A running PostgreSQL instance
+
+## Setup
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+Create a `.env` file at the project root with the database connection details (consumed in [src/app.module.ts](src/app.module.ts) via `@nestjs/config`):
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=todo_app
+JWT_SECRET=replace-me
+```
+
+> Note: `synchronize: true` is enabled in TypeORM config, so the schema is auto-created from entities on boot. Fine for development — **switch off and use migrations before any production use**.
+
+## Running the app
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev      # watch mode (development)
+npm run build          # compile to dist/
+npm run start:prod     # run compiled output
 ```
 
-## Run tests
+The server listens on `PORT` (defaults to `3000`).
+
+## API
+
+All routes are prefixed with `/api`.
+
+### Auth (`/api/auth`)
+- `POST /signIn` — body: `{ email, password }` → `{ access_token, userId, email }`
+- `GET  /profile` — requires `Authorization: Bearer <token>`
+
+### User (`/api/user`) — all routes require Bearer token
+- `POST   /`     — create user (registration; `{ email, password }`)
+- `GET    /`     — list users
+- `GET    /:id`  — get user
+- `PATCH  /:id`  — update user
+- `DELETE /:id`  — delete user
+
+### Todo (`/api/todo`)
+- `POST   /`              — create todo
+- `GET    /`              — list all todos
+- `GET    /user/:userId`  — list todos for a user
+- `GET    /:id`           — get todo
+- `PATCH  /:id`           — update todo
+- `DELETE /:id`           — delete todo
+
+## Project structure
+
+```
+src/
+  app.module.ts          # root module, wires TypeORM + feature modules
+  main.ts                # bootstrap, CORS, listens on PORT
+  auth/                  # signIn, JWT issuance, AuthGuard
+  user/                  # registration with bcrypt, CRUD
+  todo/                  # per-user todos, CRUD
+test/                    # e2e tests
+```
+
+Feature modules follow the standard Nest pattern: `*.module.ts` wires `*.controller.ts` (HTTP) and `*.service.ts` (business logic). Unit tests (`*.spec.ts`) live alongside source files; e2e tests live in `test/`.
+
+## Testing
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test           # unit tests
+npm run test:watch     # unit tests in watch mode
+npm run test:cov       # unit tests with coverage
+npm run test:e2e       # e2e tests
+npx jest path/to/file  # single test file
 ```
 
-## Deployment
+### Unit testing notes
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Services in this project depend on injected providers (TypeORM repositories, `JwtService`, other services). In unit tests, **mock every injected dependency** in the test module:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```ts
+providers: [
+  UserService,
+  { provide: getRepositoryToken(User), useValue: userRepositoryMock },
+]
+```
+
+For services that depend on other services, mock the service with `{ provide: UserService, useValue: { findOneByEmail: jest.fn() } }`. See [src/auth/auth.service.spec.ts](src/auth/auth.service.spec.ts) for a worked example.
+
+**bcrypt gotcha:** `jest.spyOn(bcrypt, 'compare')` fails because its exports aren't configurable. Use:
+
+```ts
+jest.mock('bcrypt');
+const bcryptCompare = bcrypt.compare as jest.Mock;
+bcryptCompare.mockResolvedValue(true);
+```
+
+### What to test (priority order)
+
+1. **`AuthService`** — sign-in happy path, unknown email, wrong password (same error message in both failure cases).
+2. **`AuthGuard`** — no header, malformed header, valid token attaches `request.user`, invalid token throws `UnauthorizedException`.
+3. **`UserService.create`** — duplicate email rejection, password is hashed (never stored plaintext).
+4. **`TodoService`** — `create`/`findByUserId` guard against missing user; pass-through methods get one "calls the repo with right args" test each.
+5. **Controllers** — one forwarding test each; they're thin.
+
+Skip unit tests for DTOs, entities, and modules — DTOs are exercised by e2e validation tests, entities have no logic, modules are wiring.
+
+## Linting & formatting
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run lint           # ESLint with auto-fix
+npm run format         # Prettier
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+ESLint config ([eslint.config.mjs](eslint.config.mjs)) uses `typescript-eslint` with type-checked rules. Notable: `no-explicit-any` is off, `no-floating-promises` is a warning, Prettier violations are errors.
 
-## Resources
+## Known issues / follow-ups
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- `AuthService` throws plain `Error` on bad credentials → produces HTTP 500 instead of 401. Should throw `UnauthorizedException`.
+- No global `ValidationPipe` in `main.ts`, so DTO validators (`@IsEmail`, etc.) aren't enforced. Register `app.useGlobalPipes(new ValidationPipe())` to fix.
+- `TodoController` has no `AuthGuard` and no ownership checks — any client can read/modify any user's todos.
+- `TypeOrmModule` uses `synchronize: true` — replace with migrations before production.
