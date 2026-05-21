@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { TodoController } from './todo.controller';
 import { TodoService } from './todo.service';
 import { Todo } from './entities/todo.entity';
@@ -15,6 +16,7 @@ describe('TodoController', () => {
         TodoService,
         { provide: getRepositoryToken(Todo), useValue: {} },
         { provide: getRepositoryToken(User), useValue: {} },
+        { provide: JwtService, useValue: { verifyAsync: jest.fn() } },
       ],
     }).compile();
 

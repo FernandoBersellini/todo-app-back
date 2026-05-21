@@ -38,19 +38,19 @@ describe('AuthService', () => {
   it('should sign in a user with valid credentials', async () => {
     userServiceMock.findOneByEmail.mockResolvedValue({
       id: 1,
-      email: 'Leonel91@hotmail.com',
-      username: 'leonel',
-      password: 'hashed-password',
+      email: 'email',
+      username: 'username',
+      password: 'password',
     });
     bcryptCompare.mockResolvedValue(true);
     jwtServiceMock.signAsync.mockResolvedValue('fake-jwt-token');
 
-    const result = await service.signIn('Leonel91@hotmail.com', 'senhorcafe');
+    const result = await service.signIn('email', 'password');
 
     expect(result).toEqual({
       access_token: 'fake-jwt-token',
       userId: 1,
-      email: 'Leonel91@hotmail.com',
+      email: 'email',
     });
   });
 
@@ -65,14 +65,14 @@ describe('AuthService', () => {
   it('should not enter with wrong password', async () => {
     userServiceMock.findOneByEmail.mockResolvedValue({
       id: 1,
-      email: 'Leonel91@hotmail.com',
-      username: 'leonel',
-      password: 'hashed-password',
+      email: 'email',
+      username: 'username',
+      password: 'wrong-password',
     });
     bcryptCompare.mockResolvedValue(false);
 
     await expect(
-      service.signIn('Leonel91@hotmail.com', 'wrong-password'),
+      service.signIn('email', 'wrong-password'),
     ).rejects.toThrow('Invalid credentials');
   });
 });

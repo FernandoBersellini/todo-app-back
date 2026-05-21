@@ -38,6 +38,20 @@ describe('UserService', () => {
   it('should not create a duplicated user', async () => {
     userRepositoryMock.findOneBy.mockResolvedValue({ id: 1, email: 'email', username: 'username', password: 'password' })
 
-    await expect(service.create({ email: 'Leonel91@hotmail.com', password: 'password' })).rejects.toThrow('User already exists');
+    await expect(service.create({ email: 'email', password: 'password' })).rejects.toThrow('User already exists');
+  });
+
+  it('should encrypt user password before saving', async () => {
+    const createUserDto = { email: 'email', password: 'password' };
+
+    userRepositoryMock.findOneBy.mockResolvedValue(null);
+    bcryptHashSpy.mockResolvedValue('hashed-password');
+    userRepositoryMock.save.mockImplementation((user) => user);
+    userRepositoryMock.create.mockImplementation((user) => user);
+
+    await service.create(createUserDto);
+
+    expect(bcryptHashSpy).toHaveBeenCalledWith('password', 10);
+    expect(userRepositoryMock.save).toHaveBeenCalledWith(expect.objectContaining({ password: 'hashed-password' }));
   });
 });
