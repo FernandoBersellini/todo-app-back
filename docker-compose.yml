@@ -16,6 +16,20 @@ services:
       timeout: 5s
       retries: 10
 
+  seed:
+    build: .
+    restart: "no"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    command: sh -c "node ./node_modules/typeorm/cli.js migration:run -d ./dist/database/data-source.js && node ./dist/database/seeds/seed.js"
+    depends_on:
+      db:
+        condition: service_healthy
+
   app:
     build: .
     restart: unless-stopped
@@ -32,6 +46,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      seed:
+        condition: service_completed_successfully
 
 volumes:
   db_data:
