@@ -8,16 +8,21 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
   async create(createUserDto: CreateUserDto) {
     const user = await this.findOneByEmail(createUserDto.email);
-    if(user){
-      throw new BadRequestException("User already exists");
+    if (user) {
+      throw new BadRequestException('User already exists');
     }
 
     const { password, ...rest } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = this.userRepository.create({ ...rest, password: hashedPassword });
+    const newUser = this.userRepository.create({
+      ...rest,
+      password: hashedPassword,
+    });
 
     return this.userRepository.save(newUser);
   }

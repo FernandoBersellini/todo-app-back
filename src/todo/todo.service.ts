@@ -8,9 +8,14 @@ import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class TodoService {
-  constructor(@InjectRepository(Todo) private todoRepository: Repository<Todo>, @InjectRepository(User) private userRepository: Repository<User>) { }
+  constructor(
+    @InjectRepository(Todo) private todoRepository: Repository<Todo>,
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
   async create(createTodoDto: CreateTodoDto) {
-    const user = await this.userRepository.findOne({ where: { id: createTodoDto.userId } });
+    const user = await this.userRepository.findOne({
+      where: { id: createTodoDto.userId },
+    });
     if (!user) {
       throw new Error('User not found');
     }

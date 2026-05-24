@@ -20,10 +20,7 @@ describe('AuthGuard', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthGuard,
-        { provide: JwtService, useValue: jwtServiceMock },
-      ],
+      providers: [AuthGuard, { provide: JwtService, useValue: jwtServiceMock }],
     }).compile();
 
     guard = module.get<AuthGuard>(AuthGuard);
@@ -37,21 +34,27 @@ describe('AuthGuard', () => {
   it('throws UnauthorizedException when Authorization header is missing', async () => {
     const { context } = buildContext({ authorization: undefined });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
     expect(jwtServiceMock.verifyAsync).not.toHaveBeenCalled();
   });
 
   it('throws UnauthorizedException when scheme is not Bearer', async () => {
     const { context } = buildContext({ authorization: 'Basic some-token' });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
     expect(jwtServiceMock.verifyAsync).not.toHaveBeenCalled();
   });
 
   it('returns true and attaches the payload to request.user on a valid token', async () => {
     const payload = { sub: 1, username: 'leonel' };
     jwtServiceMock.verifyAsync.mockResolvedValue(payload);
-    const { context, request } = buildContext({ authorization: 'Bearer valid-token' });
+    const { context, request } = buildContext({
+      authorization: 'Bearer valid-token',
+    });
 
     const result = await guard.canActivate(context);
 
@@ -62,9 +65,13 @@ describe('AuthGuard', () => {
 
   it('throws UnauthorizedException when verifyAsync rejects', async () => {
     jwtServiceMock.verifyAsync.mockRejectedValue(new Error('jwt expired'));
-    const { context, request } = buildContext({ authorization: 'Bearer expired-token' });
+    const { context, request } = buildContext({
+      authorization: 'Bearer expired-token',
+    });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
+    );
     expect(request.user).toBeUndefined();
   });
 });

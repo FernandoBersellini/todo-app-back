@@ -1,14 +1,14 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateTodoDto {
-    @IsString()
-    title: string;
+  @IsString()
+  title: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsNumber()
-    @IsOptional()
-    userId?: number;
+  @IsNumber()
+  @IsOptional()
+  userId?: number;
 }

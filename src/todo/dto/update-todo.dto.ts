@@ -3,15 +3,15 @@ import { CreateTodoDto } from './create-todo.dto';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateTodoDto extends PartialType(CreateTodoDto) {
-    @IsString()
-    @IsOptional()
-    title?: string;
+  @IsString()
+  @IsOptional()
+  title?: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsBoolean()
-    @IsOptional()
-    completed?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  completed?: boolean;
 }

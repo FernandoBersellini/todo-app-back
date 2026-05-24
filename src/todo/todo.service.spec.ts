@@ -44,6 +44,4 @@ describe('TodoService', () => {
 
     await expect(service.create(todo)).rejects.toThrow('User not found');
   });
-
-  
 });

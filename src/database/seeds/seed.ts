@@ -27,12 +27,22 @@ async function seed() {
   );
 
   await todoRepo.save([
-    todoRepo.create({ title: 'Buy groceries', description: 'Milk, eggs, bread', user }),
+    todoRepo.create({
+      title: 'Buy groceries',
+      description: 'Milk, eggs, bread',
+      user,
+    }),
     todoRepo.create({ title: 'Walk the dog', completed: true, user }),
-    todoRepo.create({ title: 'Write tests', description: 'Increase coverage', user }),
+    todoRepo.create({
+      title: 'Write tests',
+      description: 'Increase coverage',
+      user,
+    }),
   ]);
 
-  console.log('Seed: inserted 1 user (demo@example.com / password123) and 3 todos.');
+  console.log(
+    'Seed: inserted 1 user (demo@example.com / password123) and 3 todos.',
+  );
   await dataSource.destroy();
 }
 

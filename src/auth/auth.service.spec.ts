@@ -57,9 +57,9 @@ describe('AuthService', () => {
   it('should not enter with unknown email', async () => {
     userServiceMock.findOneByEmail.mockResolvedValue(null);
 
-    await expect(service.signIn('unknown@hotmail.com', 'unknown')).rejects.toThrow(
-      'Invalid credentials',
-    );
+    await expect(
+      service.signIn('unknown@hotmail.com', 'unknown'),
+    ).rejects.toThrow('Invalid credentials');
   });
 
   it('should not enter with wrong password', async () => {
@@ -71,8 +71,8 @@ describe('AuthService', () => {
     });
     bcryptCompare.mockResolvedValue(false);
 
-    await expect(
-      service.signIn('email', 'wrong-password'),
-    ).rejects.toThrow('Invalid credentials');
+    await expect(service.signIn('email', 'wrong-password')).rejects.toThrow(
+      'Invalid credentials',
+    );
   });
 });
