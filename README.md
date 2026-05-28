@@ -4,6 +4,8 @@ A production-deployed **NestJS 11** REST API for a todo application, backed by *
 
 Live frontend: [todo-app-frontend-o3bc.vercel.app](https://todo-app-frontend-o3bc.vercel.app)
 
+Frontend repo: https://github.com/FernandoBersellini/todo-app-frontend
+
 ## Highlights
 
 - **Deployed end-to-end.** Backend + Postgres on Railway, frontend on Vercel, push-to-`main` continuous delivery gated by CI. CORS is locked to the Vercel origin via env var.
